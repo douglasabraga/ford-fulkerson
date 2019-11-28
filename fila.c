@@ -44,3 +44,30 @@ void remover(TFila *F){
 		free(aux);
 	}
 }
+
+/********************** LISTA *******************************/
+void inicializaLista(TLista *L){
+	L->inicio = NULL;
+	L->fim = NULL;
+}
+
+
+void insereCaminhao(TLista *L, char placa[], char nome[], int capacidade){
+	TCaminhao *novo = (TCaminhao *) malloc (sizeof(TCaminhao));
+	    
+    novo->prox = NULL;
+    novo->ante = NULL;
+    
+    strcpy(novo->placa,placa);
+    strcpy(novo->nome,nome);
+    novo->capacidade = capacidade;
+    
+    if (L->inicio == NULL){
+    	L->inicio = novo;
+    	L->fim = novo;
+    } else {
+    	L->fim->prox= novo;
+    	novo->ante = L->fim;
+    	L->fim = novo;
+	}
+}
