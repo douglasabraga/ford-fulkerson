@@ -1,9 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <stdbool.h> 
-//#include <limits.h> 
 #include <string.h> 
 
+/*********************  MATRIZ **************************/
+
+typedef struct TipoGrafo{
+	int fluxo;
+	int distancia;
+}TGrafo;
+
+
+
+/******************* FILA *************************/
 typedef struct tipoVertice{
 	int vertice;
 	struct tipoVertice *prox /**ante*/;
@@ -24,13 +33,15 @@ typedef struct tipoCaminhao{
 	char placa[100];
 	char nome[100];
 	int capacidade;
+	int alocado;
 	struct tipoCaminhao *prox, *ante;
 }TCaminhao;
 
 typedef struct tipoLista{
-	TCliente *inicio;
-	TCliente *fim;
+	TCaminhao *inicio;
+	TCaminhao *fim;
 }TLista;
 
 void inicializaLista(TLista *L);
+void insereCaminhao(TLista *L, char placa[], char nome[], int capacidade);
 

@@ -1,6 +1,8 @@
 
 #include "fila.h"
 
+
+
 void inicializaFila(TFila *F){
 	F->inicio = NULL;
 	F->fim = NULL;
@@ -57,7 +59,7 @@ void insereCaminhao(TLista *L, char placa[], char nome[], int capacidade){
 	    
     novo->prox = NULL;
     novo->ante = NULL;
-    
+    novo->alocado = 0;
     strcpy(novo->placa,placa);
     strcpy(novo->nome,nome);
     novo->capacidade = capacidade;
@@ -71,3 +73,4 @@ void insereCaminhao(TLista *L, char placa[], char nome[], int capacidade){
     	L->fim = novo;
 	}
 }
+

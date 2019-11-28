@@ -1,63 +1,67 @@
 
 #include "fordFulkerson.h"
-//#include <string.h>
 
-// Number of vertices in given graph 
-//#define V 6 
-
+// Fila para o Ford-Fulkerson
 TFila fila;
-int **grafoFluxo;
-int **grafoDistancia;
-//char **vetorNomes;
-int vetorCaminhao;
-//TLista L;
+//Vetor para guardar o nome das arestas
+char **vetorNomes;
+//Grafo de vertices preenchida após a leitura dos arqs *fluxo* e *distancia*
+TGrafo **grafo;
+// Lista de caminhões preenchida após a leitura do arq
+TLista listaCaminhao;
+// Varável global responsável por armazenar a quantidade de arestas para alocação da matriz
 int qntdNodo = 0;
 
-void lerArquivoCsv(char *nomeArq, int **matriz, int op);
-void separarDadosDaLinha(int **matriz, char linha[10000], int contLinhas, int op);
+//int cont = 0;
+
+void lerArquivoCsv(char *nomeArq, TGrafo **matriz, int op);
+void separarDadosDaLinha(TGrafo **matriz, char linha[10000], int contLinhas, int op);
 int contaNodos(char linha[10000]);
 int pegarIndice(char palavra[100]);
-void imprimir(int **matriz);
+void imprimir(TGrafo **matriz, int op);
 
-void lerArquivoTxt(int *vetorCaminhao);
-void separarDadosDaLinhaTxt(int *vetorCaminhao, char linha[50]);
-void insereCaminhao(int *vetorCaminhao, char id[], char nome[], int saldo);
+void lerArquivoTxt(TLista *L);
+void separarDadosDaLinhaTxt(TLista *L, char linha[50]);
 
+
+void imprimeLista(TLista *L);
 
 
 int main() {
-
+	
 	//Verificar a quantidade de nodos
-	lerArquivoCsv("fluxo.csv", grafoFluxo, 2);
+	lerArquivoCsv("fluxo.csv", grafo, 2);
 	printf("qntd: %d\n", qntdNodo);
 	V = qntdNodo;
 	
-	grafoFluxo = alocarMatriz(qntdNodo, qntdNodo);
-	grafoDistancia = alocarMatriz(qntdNodo, qntdNodo);
+	grafo = alocarMatriz(qntdNodo, qntdNodo);
 	
-	//Preenchendo o grafo de fluxos
-	lerArquivoCsv("fluxo.csv", grafoFluxo, 0);
-	//Preenchendo o grafo de distancias
-	lerArquivoCsv("distancia.csv", grafoDistancia, 0);
+	//Preenchendo o grafo com os dados do fluxo
+	lerArquivoCsv("fluxo.csv", grafo, 0);
+	//Preenchendo o grafo com os dados da distancia
+	lerArquivoCsv("distancia.csv", grafo, 1);
 	
-	/*printf("\nGrafo de fluxo\n");
-	imprimir(grafoFluxo);
-	printf("\n\nGrafo de distancia\n");
-	imprimir(grafoDistancia);
-	printf("\n\n");*/
+	lerArquivoTxt(&listaCaminhao);
+//	printf("\n\n");
+//	imprimir(grafo, 0);
+//	
+//	printf("\n\n");
+	imprimir(grafo, 1);
 
-	
-  	int i = fordFulkerson(grafoFluxo, 0, 5, &fila);
-    printf("O caminho maximo possivel eh %d ", i ); 
+	//imprimeLista(&listaCaminhao);
+	printf("\n\n");
+
+  	int i = fordFulkerson(grafo, 0, 8, &fila, &listaCaminhao, vetorNomes);
+    printf("O caminho maximo possivel eh %d ", i );
+    
+    printf("\n\nCAMINHOES NAO ALOCADOS");
+    imprimirVeiculosNaoAlocados(&listaCaminhao);
   
     return 0; 
 }
 
 
-
-
-
-void lerArquivoTxt(int *vetorCaminhao){
+void lerArquivoTxt(TLista *L){
 	char linha[50]; // string armazenara a linha
     
     FILE *arq;
@@ -66,13 +70,13 @@ void lerArquivoTxt(int *vetorCaminhao){
 		printf("Problemas na abertura do arquivo\n");
 	}else{
 		while(fgets(linha,sizeof(linha)-1,arq) != NULL) { // Loop para ler cada linha do arquivo enquanto houver linhas
-			separarDadosDaLinhaTxt(vetorCaminhao, linha);
+			separarDadosDaLinhaTxt(L, linha);
 		}
 	}
     fclose(arq);     
 }
 
-void separarDadosDaLinhaTxt(int *vetorCaminhao, char linha[50]){
+void separarDadosDaLinhaTxt(TLista *L, char linha[50]){
 	char delimitador[] = ";"; // Caracter delimitador
     char *info; // Ponteiro para armazenar as informaÃ§Ãµes
 
@@ -84,46 +88,22 @@ void separarDadosDaLinhaTxt(int *vetorCaminhao, char linha[50]){
 
 	while(info != NULL) { // Enquanto houver linhas no arquivo
 
-		strcpy(codigo,info); // Copia info para codigo
+		strcpy(placa,info); // Copia info para codigo
 
 		info = strtok(NULL,delimitador); // Separa o nome da linha
 		strcpy(nome,info); // Copia info para nome
 
 		info = strtok(NULL,delimitador); // Separa o saldo da linha
-		saldo=atoi(info); // Copia info para saldo
+		capacidade=atoi(info); // Copia info para saldo
 
 		info = strtok(NULL,delimitador); // Separa o codigo da linha
 
-		insereCaminhao(vetorCaminhao, codigo, nome, saldo);
-	}
-}
-
-void insereCaminhao(int *vetorCaminhao, char id[], char nome[], int saldo){
-	TCliente *novo = (TCliente *) malloc (sizeof(TCliente));
-	    
-    novo->prox = NULL;
-    novo->ante = NULL;
-    
-    strcpy(novo->id,id);
-    strcpy(novo->nome,nome);
-    novo->saldo = saldo;
-    
-    if (L->inicio == NULL){
-    	L->inicio = novo;
-    	L->fim = novo;
-    } else {
-    	L->fim->prox= novo;
-    	novo->ante = L->fim;
-    	L->fim = novo;
+		insereCaminhao(L, placa, nome, capacidade);
 	}
 }
 
 
-
-
-
-
-void lerArquivoCsv(char *nomeArq, int **matriz, int op){
+void lerArquivoCsv(char *nomeArq, TGrafo **matriz, int op){
 	
 	char linha[10000]; // string armazenara a linha
     FILE *arq;
@@ -155,7 +135,7 @@ void lerArquivoCsv(char *nomeArq, int **matriz, int op){
 }
 
 
-void separarDadosDaLinha(int **matriz, char linha[10000], int contLinhas, int op){
+void separarDadosDaLinha(TGrafo **matriz, char linha[10000], int contLinhas, int op){
 	char delimitador[] = ";"; // Caracter delimitador
 	
     char *info; // Ponteiro para armazenar as informacoes
@@ -171,14 +151,12 @@ void separarDadosDaLinha(int **matriz, char linha[10000], int contLinhas, int op
 		if(contColunas != 0){
 			info = strtok(NULL, delimitador);
 			peso = atoi(info); // Copia info para peso
-			matriz[contLinhas][contColunas-1] = peso;
-			
+			if(op == 0) grafo[contLinhas][contColunas-1].fluxo = peso;
+			else grafo[contLinhas][contColunas-1].distancia = peso;
 		}
 		contColunas++;
 	}
 }
-
-
 
 
 int contaNodos(char linha[10000]){
@@ -221,13 +199,25 @@ int pegarIndice(char palavra[100]){
 	}
 }
 
-void imprimir(int **matriz){
+void imprimir(TGrafo **matriz, int op){
 	int i,j;
 	for(i = 0; i < qntdNodo; i++){
 		for(j = 0; j < qntdNodo; j++){
-			printf("|%2d", matriz[i][j]);
+			if(op == 0) printf("|%2d", matriz[i][j].fluxo);
+			else printf("|%2d", matriz[i][j].distancia);
 		}
 		printf("\n");
+	}
+}
+
+void imprimeLista(TLista *L){
+	TCaminhao *atual = L->inicio;
+
+	while(atual != NULL){
+		printf("\nPlaca: %s", atual->placa);
+		printf("\nNome: %s",atual->nome);
+		printf("\nCapacidade: %d\n", atual->capacidade);
+		atual = atual->prox;
 	}
 }
 
