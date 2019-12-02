@@ -34,8 +34,10 @@ int main() {
 	printf("qntd: %d\n", qntdNodo);
 	V = qntdNodo;
 	
-	grafo = alocarMatriz(qntdNodo, qntdNodo);
 	
+	grafo = alocarMatriz(qntdNodo, qntdNodo);
+//	imprimir(grafo, 0);
+//	printf("\n\n");
 	//Preenchendo o grafo com os dados do fluxo
 	lerArquivoCsv("fluxo.csv", grafo, 0);
 	//Preenchendo o grafo com os dados da distancia
@@ -43,19 +45,24 @@ int main() {
 	
 	lerArquivoTxt(&listaCaminhao);
 //	printf("\n\n");
-//	imprimir(grafo, 0);
+	imprimir(grafo, 0);
 //	
 //	printf("\n\n");
-	imprimir(grafo, 1);
+	//imprimir(grafo, 1);
 
 	//imprimeLista(&listaCaminhao);
 	printf("\n\n");
 
   	int i = fordFulkerson(grafo, 0, 8, &fila, &listaCaminhao, vetorNomes);
-    printf("O caminho maximo possivel eh %d ", i );
+    printf("\n\nO caminho maximo possivel eh %d \n\n", i );
     
-    printf("\n\nCAMINHOES NAO ALOCADOS");
+    //printf("\n\nCAMINHOES NAO ALOCADOS");
     imprimirVeiculosNaoAlocados(&listaCaminhao);
+    printf("\n");
+    
+    
+    
+    
   
     return 0; 
 }

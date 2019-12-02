@@ -60,6 +60,7 @@ int fordFulkerson(TGrafo **grafo, int s, int t, TFila *fila, TLista *listaCaminh
     int max_flow = 0;  // There is no flow initially 
 
     // Augment the flow while tere is path from source to sink 
+    printf("\n====================== ALOCACAO DE VEICULOS ====================== \n");
     while (bfs(rGraph, s, t, parent, fila)) 
     { 
         // Find minimum residual capacity of the edges along the 
@@ -86,12 +87,13 @@ int fordFulkerson(TGrafo **grafo, int s, int t, TFila *fila, TLista *listaCaminh
 
        	imprimirCaminho(vetorNomes, parent, t, s, grafo);
        	//printf("Distancia  %d", cont);
-       	printf("\nTotal caminho: %d\n", cont);
+       	
+       	printf(" Distancia: %d\n", cont);
         alocarCaminhaoFluxo(listaCaminhao, path_flow);
         
     }
     
-    
+    verificarCentroComCargaPendente(rGraph, vetorNomes);
   
     // Return the overall flow 
     return max_flow; 
@@ -106,7 +108,7 @@ void alocarCaminhaoFluxo(TLista *listaCaminhao, int path_flow){
 	
 	int capacidadeIdeal = INT_MAX;
 	char placa[50];
-	
+	int aux = 0;
 	while(atual != NULL){
 		if(atual->capacidade >=path_flow && !atual->alocado){
 			if(atual->capacidade <= capacidadeIdeal){
@@ -120,14 +122,18 @@ void alocarCaminhaoFluxo(TLista *listaCaminhao, int path_flow){
 	atual = listaCaminhao->inicio;
 	while(atual != NULL){
 		if(strcmp(atual->placa, placa) == 0){
+			aux = 1;
 			atual->alocado = 1;
-			printf("\n===\nplaca: %s", atual->placa);
+			printf("\nplaca: %s", atual->placa);
 			printf("\nNome: %s", atual->nome);
-			printf("\ncapacidade: %d\n===\n", atual->capacidade);
+			printf("\ncapacidade: %d\n", atual->capacidade);
 			//atual = NULL;
 		}
 		atual = atual->prox;
 	}
+	
+	if(!aux) printf("Não existe veículos disponiveis suficientes");
+	
 	
 }
 
@@ -136,7 +142,8 @@ void imprimirCaminho(char **vetorNomes, int parent[], int j, int s, TGrafo **gra
 	// Caso base: se j é fonte
 	
 	if(s >= 0){
-		printf("Origem %s ", vetorNomes[s]);
+		printf("\n===\n");
+		printf("Caminho %s, ", vetorNomes[s]);
 		cont = 0;
 	}
 
@@ -145,7 +152,7 @@ void imprimirCaminho(char **vetorNomes, int parent[], int j, int s, TGrafo **gra
   
     imprimirCaminho(vetorNomes, parent, parent[j], -1, grafo);
   	//printf("%d", grafo[parent[j]][j].distancia);
-    printf("%s ", vetorNomes[j]);
+    printf("%s, ", vetorNomes[j]);
     cont+= grafo[parent[j]][j].distancia;
     
 }
@@ -153,11 +160,12 @@ void imprimirCaminho(char **vetorNomes, int parent[], int j, int s, TGrafo **gra
 
 void imprimirVeiculosNaoAlocados(TLista *listaCaminhoes){
 	TCaminhao *atual = listaCaminhoes->inicio;
-	int aux = 1;
+	int aux = 0;
 	while(atual != NULL){
 		if(!atual->alocado){
-			printf("\n===================");
-			printf("\n%d)", aux);
+			if(!aux) 	printf("\n\n========================== VEICULOS NAO ALOCADOS =======================\n");
+			//printf("\n===================");
+			printf("\n%d)", aux+1);
 			printf("\nPlaca: %s", atual->placa);
 			printf("\nNome: %s", atual->nome);
 			printf("\nCapacidade: %d", atual->capacidade);
@@ -168,6 +176,19 @@ void imprimirVeiculosNaoAlocados(TLista *listaCaminhoes){
 	}
 }
 
+
+void verificarCentroComCargaPendente(int **grafo, char **vetorNomes){
+	int j, i;
+	printf("\n\n========================== CARGAS PENDENTES =======================\n");
+	for(i = 0; i < V; i++){
+		for(j = 0; j < V; j++){
+			if(grafo[i][j] > 0) printf("%s -> %s: %d\n", vetorNomes[i], vetorNomes[j], grafo[i][j]);
+		}
+		
+	}
+		//printf("\n\n=============================================================\n");
+
+}
 
 
 TGrafo** alocarMatriz(int linhas, int colunas){ //Recebe a quantidade de linhas e colunas como Parâmetro

@@ -10,3 +10,4 @@ int **alocarMatrizInt(int linhas, int colunas);
 void alocarCaminhaoFluxo(TLista *listaCaminhao, int path_flow);
 void imprimirCaminho(char **vetorNomes, int parent[], int j, int s, TGrafo **grafo);
 void imprimirVeiculosNaoAlocados(TLista *listaCaminhoes);
+void verificarCentroComCargaPendente(int **grafo, char **vetorNomes);
